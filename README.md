@@ -14,7 +14,7 @@
 
 # plan
  for planning further after a reasarch(using AI and planing agents) i came up with this plan   
- # 1 assumptions
+ # assumptions
   # Data format
   the data would be saved in the format of a List of Products (a java object of string and int value).
   # What we call a duplicate 
@@ -26,24 +26,24 @@
   # Output format
   the output of the script is a list of pairs contains no duplicates and the lowest price for each products among the duplicates.
 
-# how the data is proccesed.
-1. Clean the product name.
-  - convert to lowercase
-  - remove punctuation and extra spaces
-  - trim whitespace
-
-2. Normalize tokens.
-  - map known Hebrew words to English canonical tokens
-  - apply fuzzy matching only to small typos (keep the accepted distance small)
-  - keep fuzzy matching script-aware so Hebrew compares with Hebrew and English compares with English
-
-3. Build a canonical key.
-  - use brand and model as the main identity
-  - treat family words like galaxy or air as optional when brand and model already identify the product
-
-4. Group and merge.
-  - group products by the canonical key
-  - keep the lowest price in each group
+ # how the data is proccesed.
+ 1. Clean the product name.
+   - convert to lowercase
+   - remove punctuation and extra spaces
+   - trim whitespace
+ 
+ 2. Normalize tokens.
+   - map known Hebrew words to English canonical tokens
+   - apply fuzzy matching only to small typos (keep the accepted distance small)
+   - keep fuzzy matching script-aware so Hebrew compares with Hebrew and English compares with English
+ 
+ 3. Build a canonical key.
+   - use brand and model as the main identity
+   - treat family words like galaxy or air as optional when brand and model already identify the product
+ 
+ 4. Group and merge.
+   - group products by the canonical key
+   - keep the lowest price in each group
 
 ## Why this works
 
