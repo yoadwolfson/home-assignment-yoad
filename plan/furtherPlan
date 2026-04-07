@@ -1,0 +1,304 @@
+# Product Deduplication Assignment - Detailed Implementation Plan
+
+## 1. Goal
+Implement a Java solution that reads a list of products with prices, detects duplicate products even when names vary in formatting, and writes a deduplicated list where each unique product keeps the lowest observed price.
+
+This document is written so a human or another agent can execute the work without further clarification.
+
+## 2. Constraints
+- Time budget: 2 to 3 hours.
+- Language: Java.
+- Deliverables: one main source file, one test file, one input JSON file, one output JSON file, one README.
+- Keep the solution deterministic, minimal, and easy to explain in an interview.
+- Do not introduce unnecessary frameworks or infrastructure.
+
+## 3. Deliverables
+Create the following files in a folder named `ProductDeduplication`:
+
+1. `ProductDeduplication.java`
+2. `DedupTest.java`
+3. `sample-data.json`
+4. `output.json`
+5. `README.md`
+
+## 4. Recommended Solution Shape
+Use one Java file for the implementation and one Java file for tests.
+
+### Why this shape
+- Fast to build within the time limit.
+- Easy to compile and run from the command line.
+- Easy to explain during an interview.
+- Keeps focus on the deduplication logic rather than project scaffolding.
+
+## 5. Matching Strategy
+Use normalization-based matching.
+
+### Normalization rules
+For each product name, apply these steps in order:
+1. Convert to lowercase.
+2. Trim leading and trailing whitespace.
+3. Replace repeated whitespace with a single space.
+4. Remove punctuation characters.
+5. Use the resulting string as the comparison key.
+
+### Important limitation to document
+This lean version does not solve full semantic matching across Hebrew and English. If two names normalize to different strings, they will not be merged automatically unless a manual mapping layer is added later.
+
+## 6. Implementation Phases
+
+## Phase 1: Setup and sample data
+### Goal
+Create the folder, files, and representative input before writing code.
+
+### Tasks
+1. Create the `ProductDeduplication` folder.
+2. Create the five deliverable files.
+3. Add sample input data with 8 to 10 products.
+4. Include these cases in the sample file:
+	- exact duplicates
+	- case variations
+	- spacing variations
+	- punctuation variations
+	- one Hebrew example
+	- at least one product with multiple prices
+
+### Acceptance criteria
+- Sample input exists.
+- Sample input contains at least 2 duplicate groups.
+- Sample input is sufficient to validate the full pipeline.
+
+## Phase 2: Product model
+### Goal
+Create a minimal product representation.
+
+### Tasks
+Implement a `Product` class with:
+- `String name`
+- `double price`
+
+### Recommended behavior
+- Add a constructor that takes `name` and `price`.
+- Add `toString()` for debugging and readable output.
+- Keep the class simple and avoid unnecessary setters.
+
+### Acceptance criteria
+- A product can be instantiated in one line.
+- The object is easy to print and inspect.
+
+## Phase 3: Normalization
+### Goal
+Convert different textual versions of the same product into the same comparison key.
+
+### Required method
+- `static String normalize(String name)`
+
+### Required behavior
+- If input is null, return an empty string.
+- If input is empty or whitespace-only, return an empty string.
+- Convert to lowercase.
+- Remove punctuation using a regex.
+- Collapse multiple whitespace characters into one space.
+- Trim the result.
+
+### Suggested edge cases to test
+- `Samsung Galaxy S23`
+- `SAMSUNG   GALAXY S23!!!`
+- `  iPhone 15 Pro  `
+- `null`
+- `""`
+
+### Acceptance criteria
+- Equivalent formatting variants normalize to the same key.
+- Invalid input does not crash the program.
+
+## Phase 4: Duplicate grouping
+### Goal
+Group products by normalized name.
+
+### Required method
+- `static Map<String, List<Product>> groupDuplicates(List<Product> products)`
+
+### Required behavior
+- Iterate through every product.
+- Normalize each product name.
+- Use the normalized value as the map key.
+- Store all products with the same key in the same list.
+
+### Acceptance criteria
+- All products are placed into a group.
+- Products with the same normalized key appear in the same group.
+
+## Phase 5: Lowest-price merge
+### Goal
+Reduce each duplicate group to a single representative product.
+
+### Required methods
+- `static Product mergeGroup(List<Product> group)`
+- `static List<Product> deduplicateProducts(List<Product> products)`
+
+### Required behavior
+- For each group, scan all prices and keep the minimum.
+- Return one merged product per group.
+- Preserve one representative name consistently.
+
+### Name retention rule
+Use the first product name encountered in each group as the output name.
+
+### Acceptance criteria
+- Each duplicate group produces one output product.
+- The output price is always the minimum in the group.
+
+## Phase 6: Input and output
+### Goal
+Read the sample input and write the deduplicated output.
+
+### Required methods
+- `static List<Product> readProductsFromJson(String filePath)`
+- `static void writeProductsToJson(List<Product> products, String filePath)`
+
+### Required behavior
+- Read a JSON array of objects containing `name` and `price`.
+- Write the output in the same JSON array format.
+- Keep the parser simple and controlled for the assignment.
+
+### Acceptance criteria
+- The script can read the sample file.
+- The script can write a valid output file.
+- The output contains fewer items when duplicates exist.
+
+## Phase 7: Entry point
+### Goal
+Provide a command-line flow that runs the whole process.
+
+### Required method
+- `public static void main(String[] args)`
+
+### Required behavior
+1. Validate that input and output arguments are provided.
+2. Read the input JSON file.
+3. Deduplicate the products.
+4. Write the output JSON file.
+5. Print a small summary to the console.
+
+### Suggested console summary
+- number of input products
+- number of output products
+- number of merged duplicates
+
+### Acceptance criteria
+- The script can be run directly from the terminal.
+- The full workflow completes without manual intervention.
+
+## Phase 8: Tests
+### Goal
+Prove that normalization and deduplication work correctly.
+
+### Required tests in `DedupTest.java`
+1. Normalization test
+	- Verifies case folding, punctuation removal, and whitespace cleanup.
+
+2. Grouping test
+	- Verifies related variants end up in one group.
+
+3. Lowest-price test
+	- Verifies the minimum price is selected correctly.
+
+4. End-to-end test
+	- Verifies the full deduplication flow reduces the product count and keeps the lowest prices.
+
+### Optional tests if time remains
+5. Empty input test
+6. Null name test
+7. Hebrew example test
+
+### Acceptance criteria
+- Tests cover the main business rule.
+- A regression in normalization or price selection would fail at least one test.
+
+## Phase 9: README
+### Goal
+Make the solution interview-ready.
+
+### Required sections in README
+1. Problem statement
+2. Assumptions
+3. Approach
+4. Normalization rules
+5. How to run
+6. Sample input and output
+7. Edge cases handled
+8. Limitations
+9. Future improvements
+10. Interview talking points
+
+### Key points to include
+- The solution is deterministic.
+- The solution is intentionally simple to fit the time limit.
+- Hebrew-English semantic matching is out of scope for the lean version.
+- The minimum price rule is the main business rule.
+
+## 7. Suggested implementation order
+Follow this order to reduce risk and avoid rework:
+
+1. Create the project folder and files.
+2. Write the README outline and matching rules.
+3. Implement `Product`.
+4. Implement `normalize()`.
+5. Implement `groupDuplicates()`.
+6. Implement `mergeGroup()` and `deduplicateProducts()`.
+7. Implement JSON input and output.
+8. Implement `main()`.
+9. Add tests.
+10. Refine the README.
+11. Run final validation.
+
+## 8. Sample input guidance
+The sample JSON should include:
+- Samsung Galaxy S23 variants
+- iPhone 15 Pro variants
+- Google Pixel 8 variants
+- iPad Air variants
+- one Hebrew-named product
+
+## 9. Validation checklist
+Before finishing, verify all of the following:
+
+1. The project compiles.
+2. The main script runs from the command line.
+3. Duplicate groups are merged correctly.
+4. The lowest price is always retained.
+5. The output JSON is valid.
+6. The tests pass.
+7. The README explains the approach clearly.
+
+## 10. Risks and mitigations
+### Risk: Spending too much time on parsing
+Mitigation: Keep the input format controlled and simple.
+
+### Risk: Overengineering the matching logic
+Mitigation: Stay with deterministic normalization only.
+
+### Risk: Hebrew/English variants not merging
+Mitigation: Document the limitation clearly and mention a future mapping approach.
+
+### Risk: Weak README
+Mitigation: Treat the README as a deliverable, not an afterthought.
+
+## 11. Interview framing
+If asked to explain the solution, present it like this:
+
+- I used normalization-based matching because the task is time-boxed and needs a deterministic solution.
+- I separated normalization, grouping, and merging so the logic stays testable.
+- I preserved the minimum price because that is the core business rule.
+- I documented limitations honestly, especially around cross-language matching.
+- If I had more time, I would add fuzzy matching and a stronger multilingual strategy.
+
+## 12. Definition of done
+The assignment is complete when:
+1. Input can be read successfully.
+2. Duplicate products are grouped correctly.
+3. The lowest price is retained for each group.
+4. Output is written successfully.
+5. Tests pass.
+6. README is complete.
+7. Another developer or agent can run the project without extra guidance.
